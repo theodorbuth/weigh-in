@@ -77,6 +77,15 @@ begin
   end;
   raise notice 'PASS req 3: wrong password inserts nothing; join works; joining twice -> unique_violation (PK)';
 end $$;
+
+-- Members can read the project password to share it (non-members can't see the project at all — checked below).
+do $$
+declare pw text;
+begin
+  select password into pw from public.projects where id = (select project_id from t_project);
+  assert pw = 'secret42', 'a member should be able to read the project password, got ' || coalesce(pw, 'NULL');
+  raise notice 'PASS members can read the project password';
+end $$;
 do $$ begin perform pg_temp.act_as_admin(); end $$;
 
 do $$

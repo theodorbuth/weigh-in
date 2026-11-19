@@ -8,19 +8,23 @@
 
 .card {
   width: 100%;
-  max-width: 400px;
-  padding: 32px 28px 28px;
+  max-width: 480px;
+  padding: 40px;
   border: 1px solid var(--line);
-  border-radius: var(--radius-card);
+  border-radius: var(--radius-form);
   background: var(--card);
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
+}
+
+.wide {
+  max-width: 560px;
 }
 
 
 .title {
-  font: 700 24px/1.3 var(--font);
+  font: 700 28px/1.3 var(--font);
   text-align: center;
 }
 
@@ -46,10 +50,10 @@
 }
 
 .input {
-  height: 44px;
-  padding: 0 14px;
+  height: 49px;
+  padding: 0 16px;
   border: 1px solid transparent;
-  border-radius: var(--radius-field);
+  border-radius: var(--radius-input);
   background: var(--canvas);
   color: var(--navy);
   font: var(--text);
@@ -71,6 +75,17 @@
 
 .submit {
   width: 100%;
+  height: 49px;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+}
+
+.row > * {
+  flex: 1;
+  min-width: 0;
 }
 
 .switch {
@@ -86,4 +101,10 @@
 .switch a {
   color: var(--navy);
   text-underline-offset: 3px;
+}
+
+.hint {
+  margin-top: -8px;
+  font: var(--small);
+  color: var(--body);
 }

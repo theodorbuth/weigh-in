@@ -1,0 +1,44 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--canvas);
+  color: var(--navy);
+  font: 400 15px/normal var(--font);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  border-color: var(--line);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--coding);
+  outline-offset: 2px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border-radius: 50%;
+}
+
+.pen {
+  color: var(--body);
+}
+
+.add {
+  composes: chip;
+  gap: 6px;
+  background: none;
+  border: 1px dashed #9e9991;
+}
+
+.add:hover {
+  border-color: var(--navy);
+}

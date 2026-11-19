@@ -1,0 +1,46 @@
+.field {
+  height: 49px;
+  padding: 0 8px 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-radius: var(--radius-input);
+  background: var(--canvas);
+  color: var(--navy);
+  font: var(--text);
+}
+
+.copy {
+  height: 34px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--navy);
+  font: var(--small);
+  cursor: pointer;
+}
+
+.copy:hover {
+  background: var(--card);
+}
+
+.copied {
+  color: var(--confirmation);
+}
+
+.value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.buttons {
+  display: flex;
+  flex: none;
+}

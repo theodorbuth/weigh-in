@@ -2,8 +2,11 @@ import { createBrowserRouter } from 'react-router'
 import ErrorPage from './routes/ErrorPage.tsx'
 import Hello from './routes/Hello.tsx'
 import Home from './routes/Home.tsx'
+import JoinProject from './routes/JoinProject.tsx'
 import Login from './routes/Login.tsx'
+import NewProject from './routes/NewProject.tsx'
 import NotFound from './routes/NotFound.tsx'
+import Project from './routes/Project.tsx'
 import RequireAuth from './routes/RequireAuth.tsx'
 import Styles from './routes/Styles.tsx'
 import Welcome from './routes/Welcome.tsx'
@@ -12,7 +15,7 @@ export const router = createBrowserRouter([
   {
     errorElement: <ErrorPage />,
     children: [
-      { path: '/', element: <Hello /> },
+      { path: '/hello', element: <Hello /> },
       { path: '/styles', element: <Styles /> },
       { path: '/login', element: <Login /> },
       {
@@ -20,7 +23,11 @@ export const router = createBrowserRouter([
         element: <RequireAuth />,
         children: [
           { path: '/welcome', element: <Welcome /> },
-          { path: '/home', element: <Home /> },
+          { path: '/', element: <Home /> },
+          { path: '/new', element: <NewProject /> },
+          { path: '/join', element: <JoinProject /> },
+          { path: '/join/:code', element: <JoinProject /> },
+          { path: '/p/:projectId', element: <Project /> },
         ],
       },
       { path: '*', element: <NotFound /> },

@@ -1,0 +1,26 @@
+.pile {
+  position: relative;
+  margin: 0 auto;
+}
+
+.glow,
+.plinth {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.stone {
+  position: absolute;
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-bottom: 20px;
+  font: var(--small);
+  color: var(--body);
+  text-align: center;
+}

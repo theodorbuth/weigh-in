@@ -1,0 +1,130 @@
+.main {
+  max-width: 1312px;
+  margin: 0 auto;
+  padding: 0 64px 64px;
+  box-sizing: content-box;
+}
+
+.title {
+  height: 90px;
+  display: flex;
+  align-items: center;
+  font: var(--title);
+}
+
+.hero {
+  display: block;
+  width: 100%;
+  max-width: 1050px;
+  height: auto;
+  margin: 18px auto 22px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
+}
+
+.card {
+  min-height: 300px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--card);
+  color: var(--navy);
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+a.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(20, 18, 43, 0.08);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--coding);
+  outline-offset: 3px;
+}
+
+.name {
+  font: 700 22px/normal var(--font);
+}
+
+.meta {
+  margin-top: 6px;
+  font: var(--small);
+  color: var(--body);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.avatars {
+  display: flex;
+}
+
+.avatars > span {
+  width: 32px;
+  height: 32px;
+  margin-right: -6px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--card);
+  border-radius: 50%;
+  background: var(--panel);
+  font: var(--small);
+}
+
+.add {
+  composes: card;
+  border: 1.5px dashed #9e9991;
+  background: none;
+}
+
+.addActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.primary,
+.secondary {
+  height: 47px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  font: var(--text);
+  text-decoration: none;
+}
+
+.primary {
+  background: var(--navy);
+  color: var(--card);
+}
+
+.primary:hover {
+  background: #26234a;
+}
+
+.secondary {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--navy);
+}
+
+.secondary:hover {
+  border-color: var(--navy);
+}
+
+.status {
+  padding: 40px 0;
+  color: var(--body);
+}

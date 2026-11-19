@@ -22,7 +22,7 @@ export interface PlacedStone<T extends PitStone = PitStone> {
  */
 export function layoutPit<T extends PitStone>(
   stones: T[],
-  { width, floor, unit }: { width: number; floor: number; unit: number },
+  { width, floor, unit, taper = 0 }: { width: number; floor: number; unit: number; taper?: number },
 ): PlacedStone<T>[] {
   const OVERLAP = 0.8 // each stone advances 80% of its width
   const RISE = 0.62 // each row rises 62% of the row below's height
@@ -32,9 +32,11 @@ export function layoutPit<T extends PitStone>(
   const rows: (typeof sized)[] = []
   let row: typeof sized = []
   let used = 0
+  // taper > 0 narrows each row above the floor, so stones settle into a mound.
+  const rowLimit = (ri: number) => Math.max(width * 0.3, width * (1 - taper * ri))
   for (const s of sized) {
     const need = row.length === 0 ? s.width : s.width * OVERLAP
-    if (row.length > 0 && used + need > width) {
+    if (row.length > 0 && used + need > rowLimit(rows.length)) {
       rows.push(row)
       row = []
       used = 0
@@ -62,4 +64,26 @@ export function layoutPit<T extends PitStone>(
     bottom -= tallest * RISE
   })
   return placed
+}
+
+/** Height a layout reaches above its floor. */
+export function layoutHeight(placed: PlacedStone[], floor: number): number {
+  return placed.reduce((h, p) => Math.max(h, floor - p.y), 0)
+}
+
+/**
+ * Largest stone unit (px width of a 1-hour stone) at which EVERY pile fits in
+ * width × height. Use one unit for piles shown side by side so they stay comparable.
+ */
+export function fitUnit(
+  piles: PitStone[][],
+  { width, height, max = 40, min = 6, taper = 0 }: { width: number; height: number; max?: number; min?: number; taper?: number },
+): number {
+  for (let unit = max; unit > min; unit -= 1) {
+    const fits = piles.every(
+      (stones) => layoutHeight(layoutPit(stones, { width, floor: height, unit, taper }), height) <= height,
+    )
+    if (fits) return unit
+  }
+  return min
 }

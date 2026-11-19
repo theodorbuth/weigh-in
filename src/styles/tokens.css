@@ -15,6 +15,11 @@
   --editing: #d9695a;
   --coding: #7fa3d8;
 
+  /* Extra category colours (Figma "New category" swatches) */
+  --green: #5e9c7e;
+  --sand: #c9a27e;
+  --slate: #8a8e95;
+
   /* Status */
   --confirmation: #5e9c7e;
 
@@ -32,6 +37,8 @@
   /* Shape */
   --radius-pill: 99px;
   --radius-field: 12px;
+  --radius-input: 14px;
   --radius-card: 24px;
+  --radius-form: 28px;
   --radius-pit: 32px;
 }

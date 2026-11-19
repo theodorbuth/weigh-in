@@ -27,5 +27,5 @@ export function useAuth(): AuthState {
 
 /** Only allow same-site paths as a post-sign-in destination (no open redirects). */
 export function safeNext(next: string | null): string {
-  return next && next.startsWith('/') && !next.startsWith('//') ? next : '/home'
+  return next && next.startsWith('/') && !next.startsWith('//') ? next : '/'
 }

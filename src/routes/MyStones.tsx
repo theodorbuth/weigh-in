@@ -1,12 +1,14 @@
 import { LockKeyhole, Plus } from 'lucide-react'
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router'
 import CategoryDialog, { type CategoryDraft } from '../components/CategoryDialog'
 import CategoryPit from '../components/CategoryPit'
+import ConfirmDialog from '../components/ConfirmDialog'
 import StoneEditor, { type StoneDraft } from '../components/StoneEditor'
 import { nextFreeColour } from '../lib/colours'
 import { formatHours } from '../lib/format'
 import { fitUnit, PIT_FLOOR } from '../lib/pitLayout'
-import type { Category, StoneRow } from '../lib/project'
+import { activeRound, hasSealed, timeLeft, type Category, type StoneRow } from '../lib/project'
 import { useProjectContext } from '../lib/projectContext'
 import { supabase } from '../lib/supabase'
 import styles from './MyStones.module.css'
@@ -28,6 +30,20 @@ export default function MyStones() {
   const workspace = useRef<HTMLDivElement>(null)
   const pitRefs = useRef(new Map<string, HTMLDivElement>())
   const [popoverPos, setPopoverPos] = useState<{ left: number; top: number } | null>(null)
+  const [confirm, setConfirm] = useState<'start' | 'seal' | null>(null)
+  const [now, setNow] = useState(() => Date.now())
+  const navigate = useNavigate()
+
+  // Tick the countdown once a minute.
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 60_000)
+    return () => clearInterval(t)
+  }, [])
+
+  const round = activeRound(data)
+  const placing = round?.phase === 'placing'
+  const iSealed = !!round && hasSealed(data, round.id, me)
+  const sealedCount = round ? data.seals.filter((s) => s.round_id === round.id).length : 0
 
   const myStones = data.stones.filter((s) => s.user_id === me && s.round_id === null)
   const byCategory = (id: number | null) => myStones.filter((s) => s.category_id === id)
@@ -35,6 +51,7 @@ export default function MyStones() {
   const selected = myStones.find((s) => s.id === selectedId) ?? null
   const selectedCategory = selected ? categories.find((c) => c.id === selected.category_id) : undefined
   const total = myStones.reduce((sum, s) => sum + (s.hours ?? 0), 0)
+  const unsetCount = myStones.filter((s) => s.hours == null).length
 
   // One stone scale for all pits so sizes compare honestly (area ∝ hours).
   const unit = fitUnit(
@@ -70,6 +87,20 @@ export default function MyStones() {
     }
     await reload()
     return { ok: true, data: result }
+  }
+
+  async function startCheckin() {
+    const { ok } = await run(() => supabase.rpc('start_checkin', { p_project_id: data.project.id }))
+    if (ok) setConfirm(null)
+  }
+
+  async function seal() {
+    if (!round) return
+    const { ok } = await run(() => supabase.rpc('seal', { p_round_id: round.id }))
+    if (ok) {
+      setConfirm(null)
+      navigate('team')
+    }
   }
 
   async function addStone(categoryId: number | null) {
@@ -170,17 +201,71 @@ export default function MyStones() {
             Couldn’t save: {error}
           </p>
         ) : (
-          <p className={styles.message}>Only you can see these stones. Sealing opens when a check-in starts.</p>
+          <p className={styles.message}>
+            {!round && 'Only you can see these stones. Start a check-in when the team is ready to compare.'}
+            {placing && !iSealed &&
+              `Check-in open · ${sealedCount} of ${data.members.length} sealed · ${timeLeft(round.closes_at, now)}. Only you can see these stones until the reveal.`}
+            {placing && iSealed && (
+              <>
+                You’ve sealed this check-in. New stones go into the next one. <Link to="team">See the team</Link>
+              </>
+            )}
+            {round && !placing && (
+              <>
+                The team is rebalancing. Agree on the plan on the Team view; the next check-in can start once it’s
+                locked. <Link to="team">Go to Team</Link>
+              </>
+            )}
+          </p>
         )}
         <div className={styles.total}>
-          <span>Your total</span>
+          <span>{placing && !iSealed ? 'Ready to seal' : 'Your total'}</span>
           <strong>{formatHours(total)}</strong>
         </div>
-        <button type="button" className={styles.seal} disabled title="Opens when a check-in starts">
-          Submit and seal
-          <LockKeyhole size={18} strokeWidth={1.7} aria-hidden />
-        </button>
+        {placing && !iSealed ? (
+          <button type="button" className={styles.seal} onClick={() => setConfirm('seal')} disabled={saving}>
+            Submit and seal
+            <LockKeyhole size={18} strokeWidth={1.7} aria-hidden />
+          </button>
+        ) : (
+          <button
+            type="button"
+            className={styles.seal}
+            onClick={() => setConfirm('start')}
+            disabled={saving || !!round}
+            title={round ? (placing ? 'A check-in is already open' : 'Lock the plan first') : undefined}
+          >
+            Start check-in
+          </button>
+        )}
       </div>
+
+      {confirm === 'start' && (
+        <ConfirmDialog
+          title="Start a check-in?"
+          confirmLabel="Start check-in"
+          busy={saving}
+          error={error}
+          onConfirm={startCheckin}
+          onClose={() => setConfirm(null)}
+        >
+          Everyone on the team gets 24 hours to seal their stones. The reveal happens when the last person seals, or
+          when time runs out.
+        </ConfirmDialog>
+      )}
+      {confirm === 'seal' && (
+        <ConfirmDialog
+          title={`Seal ${formatHours(total)}?`}
+          confirmLabel="Seal my stones"
+          busy={saving}
+          error={error}
+          onConfirm={seal}
+          onClose={() => setConfirm(null)}
+        >
+          Sealed stones can’t be changed. Nobody sees them until everyone has sealed.
+          {unsetCount > 0 && ` ${unsetCount} stone${unsetCount > 1 ? 's' : ''} without hours will wait for the next check-in.`}
+        </ConfirmDialog>
+      )}
 
       {selected && popoverPos && (
         <div className={styles.popover} style={popoverPos}>

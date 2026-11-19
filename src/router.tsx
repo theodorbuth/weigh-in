@@ -8,7 +8,7 @@ import NewProject from './routes/NewProject.tsx'
 import NotFound from './routes/NotFound.tsx'
 import MyStones from './routes/MyStones.tsx'
 import ProjectLayout from './routes/ProjectLayout.tsx'
-import TeamPlaceholder from './routes/TeamPlaceholder.tsx'
+import TeamView from './routes/TeamView.tsx'
 import RequireAuth from './routes/RequireAuth.tsx'
 import Styles from './routes/Styles.tsx'
 import Welcome from './routes/Welcome.tsx'
@@ -34,7 +34,7 @@ export const router = createBrowserRouter([
             element: <ProjectLayout />,
             children: [
               { index: true, element: <MyStones /> },
-              { path: 'team', element: <TeamPlaceholder /> },
+              { path: 'team', element: <TeamView /> },
             ],
           },
         ],

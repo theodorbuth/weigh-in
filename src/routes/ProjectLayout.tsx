@@ -13,7 +13,7 @@ import styles from './ProjectLayout.module.css'
 export default function ProjectLayout() {
   const { profile } = useAuth()
   const { projectId } = useParams()
-  const { data, error, reload } = useProject(Number(projectId))
+  const { data, error, reload, remoteDrags, sendDrag } = useProject(Number(projectId))
   const [inviteOpen, setInviteOpen] = useState(false)
   const inviteRef = useRef<HTMLDivElement>(null)
 
@@ -72,7 +72,7 @@ export default function ProjectLayout() {
                 </NavLink>
               </div>
             </header>
-            <Outlet context={{ data, reload, me: profile.id } satisfies ProjectContext} />
+            <Outlet context={{ data, reload, me: profile.id, remoteDrags, sendDrag } satisfies ProjectContext} />
           </>
         )}
       </main>

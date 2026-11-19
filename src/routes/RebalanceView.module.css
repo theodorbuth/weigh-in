@@ -1,0 +1,186 @@
+.bar {
+  min-height: 64px;
+  margin-bottom: 14px;
+  padding: 10px 10px 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border: 1.5px solid transparent;
+  border-radius: 20px;
+  background: var(--panel);
+  transition: border-color 0.15s ease;
+}
+
+.barOver {
+  border-color: var(--navy);
+  border-style: dashed;
+}
+
+.barTitle {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.barTitle strong {
+  font: var(--heading);
+}
+
+.barTitle span {
+  font: var(--small);
+  color: var(--body);
+}
+
+.chips {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.allAssigned {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: var(--small);
+  color: var(--confirmation);
+}
+
+.hint {
+  font: var(--small);
+  color: var(--body);
+}
+
+.addWork {
+  flex: none;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 18px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--navy);
+  color: var(--card);
+  font: var(--small);
+  cursor: pointer;
+}
+
+.average {
+  position: absolute;
+  top: 16px;
+  left: 22px;
+  font: var(--small);
+  color: var(--body);
+}
+
+.piles {
+  padding-top: 20px;
+  display: grid;
+  align-items: end;
+  gap: 8px;
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 6px;
+  border: 1.5px dashed transparent;
+  border-radius: 20px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.cellOver {
+  border-color: var(--navy);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.cellOff {
+  opacity: 0.5;
+}
+
+.name {
+  font: 700 18px/1.3 var(--font);
+}
+
+.name span {
+  font-weight: 400;
+  color: var(--body);
+}
+
+.name .total {
+  margin-left: 10px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.delta {
+  font: var(--small);
+  color: var(--body);
+}
+
+.moving {
+  font: var(--small);
+  color: var(--coding);
+}
+
+.assigned {
+  min-height: 40px;
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.assignedCell {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: flex-start;
+  gap: 6px;
+}
+
+.agreeRow {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+}
+
+.agreeText {
+  margin-right: auto;
+  font: var(--small);
+  color: var(--body);
+}
+
+.avatars {
+  display: flex;
+  gap: 8px;
+}
+
+.agree {
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 24px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--navy);
+  color: var(--card);
+  font: var(--text);
+  cursor: pointer;
+}
+
+.agree:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.error {
+  font: var(--small);
+  color: #8a2f22;
+}

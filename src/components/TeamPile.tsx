@@ -1,5 +1,6 @@
 import plinthGlow from '../assets/plinth-glow.svg'
 import stonePlinth from '../assets/stone-plinth.svg'
+import { formatHours } from '../lib/format'
 import { layoutPit } from '../lib/pitLayout'
 import Stone from './Stone'
 import styles from './TeamPile.module.css'
@@ -9,6 +10,14 @@ export interface PileStone {
   hours: number
   /** Category colour; ignored when the pile is grey. */
   colour: string
+  /** Other work stones are drawn dashed. */
+  other?: boolean
+  /** Planned (assigned, not yet done) work: pale outlined stone on top of the pile. */
+  planned?: boolean
+  /** Dim it, e.g. the chip that's being dragged away. */
+  faded?: boolean
+  /** Shown in a hover preview when given (e.g. after the reveal). */
+  detail?: { category: string; note: string | null }
 }
 
 interface TeamPileProps {
@@ -38,18 +47,46 @@ export default function TeamPile({ stones, unit, width, height, grey = false, em
     <div className={styles.pile} style={{ width, height }}>
       <img className={styles.glow} src={plinthGlow} alt="" style={{ top: height - 26, width: width * 0.95, height: 36 }} />
       <img className={styles.plinth} src={stonePlinth} alt="" style={{ top: height - PLINTH_H, width: width * 0.75, height: PLINTH_H }} />
-      {placed.map((p) => (
-        <Stone
-          key={p.stone.id}
-          className={styles.stone}
-          style={{ left: p.x + offset, top: p.y }}
-          hours={p.stone.hours}
-          seed={p.stone.id}
-          color={p.stone.colour}
-          variant={grey ? 'sealed' : 'color'}
-          unit={unit}
-        />
-      ))}
+      {placed.map((p) => {
+        const stone = (
+          <Stone
+            hours={p.stone.hours}
+            seed={p.stone.id}
+            color={p.stone.colour}
+            variant={grey ? 'sealed' : p.stone.planned ? 'planned' : p.stone.other ? 'other' : 'color'}
+            unit={unit}
+          />
+        )
+        const d = p.stone.detail
+        if (!d || grey) {
+          return (
+            <span
+              key={p.stone.id}
+              className={styles.stone}
+              style={{ left: p.x + offset, top: p.y, opacity: p.stone.faded ? 0.35 : undefined }}
+            >
+              {stone}
+            </span>
+          )
+        }
+        return (
+          <span
+            key={p.stone.id}
+            className={`${styles.stone} ${styles.hoverable}`}
+            style={{ left: p.x + offset, top: p.y }}
+            tabIndex={0}
+            aria-label={`${d.category}, ${formatHours(p.stone.hours)}${d.note ? `: ${d.note}` : ''}`}
+          >
+            <span className={styles.tip} role="tooltip">
+              <strong>
+                {d.category} · {formatHours(p.stone.hours)}
+              </strong>
+              <span className={d.note ? styles.tipNote : styles.tipEmpty}>{d.note || 'No note'}</span>
+            </span>
+            {stone}
+          </span>
+        )
+      })}
       {stones.length === 0 && emptyText && <p className={styles.empty}>{emptyText}</p>}
     </div>
   )

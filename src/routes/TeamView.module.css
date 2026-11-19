@@ -1,0 +1,232 @@
+.toolbar {
+  min-height: 44px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  font: var(--small);
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.dashedDot {
+  composes: dot;
+  border: 1px dashed #9e9991;
+}
+
+/* The stage: light by default; dark ("night sky") only while I've sealed and wait for the reveal. */
+.stage {
+  position: relative;
+  min-height: 440px;
+  padding: 28px 24px 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: linear-gradient(180deg, #f7f2ea 0%, #efe7da 100%);
+  transition:
+    background 0.9s ease,
+    border-color 0.9s ease;
+}
+
+.dark {
+  border-color: transparent;
+  background:
+    radial-gradient(1px 1px at 12% 18%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 38% 9%, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1px 1px at 66% 21%, rgba(255, 255, 255, 0.45), transparent),
+    radial-gradient(1px 1px at 84% 12%, rgba(255, 255, 255, 0.35), transparent),
+    radial-gradient(1px 1px at 22% 34%, rgba(255, 255, 255, 0.3), transparent),
+    linear-gradient(180deg, #4a4658 0%, #24213d 45%, #15132b 100%);
+}
+
+.banner {
+  margin: -4px auto 18px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  border: 1px solid var(--line);
+  font: var(--small);
+  color: var(--navy);
+}
+
+.banner a {
+  color: var(--navy);
+  font-weight: 700;
+}
+
+.piles {
+  display: grid;
+  align-items: end;
+  gap: 8px;
+}
+
+.pileCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: settle 0.6s ease both;
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.pileName {
+  font: 700 18px/1.3 var(--font);
+  text-align: center;
+}
+
+.pileName span {
+  font-weight: 400;
+  color: var(--body);
+}
+
+.pileName .pileHours {
+  margin-left: 10px;
+  color: var(--navy);
+  font-weight: 700;
+}
+
+.notSubmitted {
+  margin-top: -6px;
+  font: var(--small);
+  color: #8a2f22;
+}
+
+.empty {
+  padding: 120px 0;
+  text-align: center;
+  color: var(--body);
+}
+
+.sealedTitle {
+  margin-bottom: 18px;
+  text-align: center;
+  font: 700 24px/1.3 var(--font);
+  color: var(--card);
+}
+
+.sealedPile {
+  display: flex;
+  justify-content: center;
+}
+
+.statusRow {
+  margin-top: 26px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px 36px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: var(--small);
+  color: var(--card);
+}
+
+.status em {
+  display: block;
+  font-style: normal;
+  color: rgba(251, 248, 242, 0.65);
+}
+
+.status em.ok {
+  color: #8fd1b0;
+}
+
+.bottom {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.locked {
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  color: var(--navy);
+  font: var(--text);
+  white-space: nowrap;
+}
+
+.rebalance {
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 24px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--navy);
+  color: var(--card);
+  font: var(--text);
+  white-space: nowrap;
+}
+
+.rebalance:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* "Who has sealed" on the light stage while a check-in is open */
+.openPanel {
+  margin-bottom: 18px;
+}
+
+.openPanel .banner {
+  margin-bottom: 14px;
+}
+
+.statusLight {
+  margin-top: 0;
+}
+
+.statusLight .status {
+  color: var(--navy);
+}
+
+.statusLight .status em {
+  color: var(--body);
+}
+
+.statusLight .status em.ok {
+  color: var(--confirmation);
+}

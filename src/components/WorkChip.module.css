@@ -1,0 +1,120 @@
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 6px 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--card);
+  color: var(--navy);
+  font: var(--small);
+  white-space: nowrap;
+  touch-action: none;
+}
+
+.small {
+  height: 32px;
+  padding: 0 4px 0 8px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+}
+
+.dragging {
+  opacity: 0.35;
+}
+
+.overlay {
+  box-shadow: 0 12px 28px rgba(20, 18, 43, 0.22);
+  cursor: grabbing;
+}
+
+.handle {
+  display: flex;
+  padding: 4px 2px;
+  border: none;
+  background: none;
+  color: var(--body);
+  cursor: grab;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  flex: none;
+  border-radius: 50%;
+}
+
+.hours {
+  color: var(--body);
+}
+
+.iconButton {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--body);
+  cursor: pointer;
+}
+
+.iconButton:hover {
+  background: var(--canvas);
+  color: var(--navy);
+}
+
+.iconButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 8;
+  min-width: 200px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--card);
+  box-shadow: 0 14px 34px rgba(20, 18, 43, 0.16);
+}
+
+.menuLabel {
+  padding: 6px 10px 2px;
+  color: var(--body);
+  font-size: 12px;
+}
+
+.menu button {
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--navy);
+  font: var(--small);
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu button:hover {
+  background: var(--canvas);
+}
+
+.menu hr {
+  width: 100%;
+  margin: 4px 0;
+  border: none;
+  border-top: 1px solid var(--line);
+}
+
+.danger {
+  color: #8a2f22 !important;
+}

@@ -1,0 +1,24 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--card);
+  font: var(--small);
+  white-space: nowrap;
+  cursor: grab;
+}
+
+.grip,
+.hours,
+.chevron {
+  color: var(--body);
+}
+
+.grip,
+.chevron {
+  display: flex;
+}

@@ -1,0 +1,40 @@
+.primary {
+  height: 48px;
+  padding: 0 24px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--navy);
+  color: var(--card);
+  font: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.primary:hover {
+  background: #26234a;
+}
+
+.primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.text {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--body);
+  font: var(--small);
+  cursor: pointer;
+}
+
+.text:hover {
+  color: var(--navy);
+  text-decoration: underline;
+}
+
+.primary:focus-visible,
+.text:focus-visible {
+  outline: 2px solid var(--coding);
+  outline-offset: 2px;
+}

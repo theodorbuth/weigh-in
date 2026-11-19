@@ -1,0 +1,27 @@
+.title {
+  font: var(--title);
+}
+
+.link {
+  margin-top: 16px;
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 24px;
+  border-radius: var(--radius-pill);
+  background: var(--navy);
+  color: var(--card);
+  font: var(--text);
+  text-decoration: none;
+}
+
+.link:hover {
+  background: #26234a;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--coding);
+  outline-offset: 2px;
+}

@@ -1,0 +1,42 @@
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  font: var(--text);
+}
+
+.button {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--navy);
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--canvas);
+}
+
+.button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--coding);
+}
+
+.value {
+  min-width: 44px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}

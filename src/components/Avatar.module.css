@@ -1,0 +1,18 @@
+.avatar {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line);
+  background: var(--panel);
+  font: var(--text);
+}
+
+.indicator {
+  position: absolute;
+  left: 28px;
+  top: 26px;
+}

@@ -1,0 +1,187 @@
+.page {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.main {
+  max-width: 1312px;
+  margin: 0 auto;
+  padding: 0 64px 64px;
+  box-sizing: content-box;
+}
+
+.heading {
+  height: 92px;
+  display: flex;
+  align-items: center;
+  font: var(--title);
+}
+
+.foundation {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Colour palette */
+.palette {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.token {
+  width: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font: var(--small);
+}
+
+.swatch {
+  height: 35px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.hex {
+  color: var(--body);
+}
+
+/* Typography + stones row */
+.row {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.type {
+  width: 350px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.typeLine {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.spec {
+  font: var(--small);
+  color: var(--body);
+}
+
+.title {
+  font: var(--title);
+}
+
+.headingSample {
+  font: var(--heading);
+}
+
+.bodySample {
+  font: var(--text);
+  color: var(--body);
+}
+
+.smallSample {
+  font: var(--small);
+  color: var(--body);
+}
+
+.icons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--navy);
+}
+
+.stones {
+  flex: 1;
+  min-width: 0;
+  height: 218px;
+  padding: 16px 24px 0;
+  border-radius: var(--radius-card);
+  background: var(--panel);
+}
+
+.stonesHeading {
+  font: var(--heading);
+}
+
+.stoneRow {
+  height: 160px;
+  padding-bottom: 22px;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.stoneItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font: var(--small);
+  color: var(--body);
+  white-space: nowrap;
+}
+
+/* Reusable components row */
+.exemplars {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.controls {
+  width: 340px;
+  height: 270px;
+  flex: none;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  border-radius: var(--radius-card);
+  background: var(--card);
+}
+
+.cardTitle {
+  font: var(--heading);
+}
+
+.controlRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.popoverSlot {
+  flex: 1;
+  min-width: 0;
+}
+
+.popoverSlot > * {
+  width: 100%;
+  min-height: 270px;
+}
+
+.removed {
+  min-height: 270px;
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  justify-items: center;
+  border-radius: var(--radius-card);
+  border: 1px dashed var(--line);
+  color: var(--body);
+  font: var(--small);
+}

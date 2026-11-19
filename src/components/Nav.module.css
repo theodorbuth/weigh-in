@@ -1,0 +1,24 @@
+.nav {
+  height: 88px;
+  padding: 0 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font: var(--heading);
+  color: var(--navy);
+  text-decoration: none;
+}
+
+.viewer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: var(--small);
+}

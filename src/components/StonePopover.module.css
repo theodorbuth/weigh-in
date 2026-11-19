@@ -1,0 +1,64 @@
+.popover {
+  width: 350px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-radius: var(--radius-card);
+  background: var(--card);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font: var(--heading);
+}
+
+.close {
+  width: 28px;
+  height: 28px;
+  margin-right: -6px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--body);
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--canvas);
+  color: var(--navy);
+}
+
+.note {
+  width: 100%;
+  min-height: 46px;
+  padding: 13px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-field);
+  background: var(--canvas);
+  font: var(--small);
+  resize: none;
+}
+
+.note::placeholder {
+  color: var(--body);
+}
+
+.note:focus {
+  outline: none;
+  border-color: var(--line);
+  background: var(--card);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

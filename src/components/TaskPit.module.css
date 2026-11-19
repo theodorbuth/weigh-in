@@ -1,0 +1,74 @@
+.pit {
+  position: relative;
+  width: 280px;
+  height: 270px;
+  flex: none;
+  border-radius: var(--radius-pit);
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.label {
+  position: absolute;
+  left: 24px;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.title {
+  font: var(--heading);
+}
+
+.meta {
+  font: var(--small);
+  color: var(--body);
+}
+
+.floor {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 0;
+  height: 200px;
+}
+
+.stone {
+  position: absolute;
+}
+
+.control {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  font: var(--small);
+  color: var(--body);
+}
+
+.control button {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--body);
+  cursor: pointer;
+}
+
+.control button:hover:not(:disabled) {
+  background: var(--canvas);
+  color: var(--navy);
+}
+
+.control button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}

@@ -1,0 +1,41 @@
+.card {
+  position: relative;
+  width: 270px;
+  height: 270px;
+  flex: none;
+  border-radius: var(--radius-card);
+  background: var(--card);
+  overflow: hidden;
+}
+
+.title {
+  position: absolute;
+  left: 24px;
+  top: 18px;
+  font: var(--heading);
+}
+
+.specimen {
+  position: absolute;
+  left: 32px;
+  top: 70px;
+  width: 205px;
+  height: 180px;
+}
+
+.glow {
+  position: absolute;
+  left: 0;
+  top: 148px;
+}
+
+.plinth {
+  position: absolute;
+  left: 14px;
+  top: 157px;
+}
+
+.stone {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}

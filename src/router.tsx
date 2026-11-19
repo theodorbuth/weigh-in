@@ -6,7 +6,9 @@ import JoinProject from './routes/JoinProject.tsx'
 import Login from './routes/Login.tsx'
 import NewProject from './routes/NewProject.tsx'
 import NotFound from './routes/NotFound.tsx'
-import Project from './routes/Project.tsx'
+import MyStones from './routes/MyStones.tsx'
+import ProjectLayout from './routes/ProjectLayout.tsx'
+import TeamPlaceholder from './routes/TeamPlaceholder.tsx'
 import RequireAuth from './routes/RequireAuth.tsx'
 import Styles from './routes/Styles.tsx'
 import Welcome from './routes/Welcome.tsx'
@@ -27,7 +29,14 @@ export const router = createBrowserRouter([
           { path: '/new', element: <NewProject /> },
           { path: '/join', element: <JoinProject /> },
           { path: '/join/:code', element: <JoinProject /> },
-          { path: '/p/:projectId', element: <Project /> },
+          {
+            path: '/p/:projectId',
+            element: <ProjectLayout />,
+            children: [
+              { index: true, element: <MyStones /> },
+              { path: 'team', element: <TeamPlaceholder /> },
+            ],
+          },
         ],
       },
       { path: '*', element: <NotFound /> },

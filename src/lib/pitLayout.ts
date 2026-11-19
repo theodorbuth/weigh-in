@@ -1,5 +1,8 @@
 import { seeded, stoneSize } from './stoneShape'
 
+/** Stone area inside a My stones pit (Figma Task pit, 421 × 220 minus the heading). */
+export const PIT_FLOOR = { width: 377, height: 160 }
+
 export interface PitStone {
   id: string | number
   hours: number

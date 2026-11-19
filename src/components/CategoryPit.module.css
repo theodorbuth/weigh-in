@@ -1,0 +1,222 @@
+.pit {
+  position: relative;
+  height: 220px;
+  border-radius: var(--radius-pit);
+  background: var(--panel);
+  box-shadow:
+    inset 0 -2px 4px rgba(255, 255, 255, 0.6),
+    inset 0 5px 12px rgba(142, 123, 88, 0.15);
+}
+
+/* Lift the hovered pit so a stone's preview card can overlap neighbouring pits. */
+.pit:hover,
+.pit:focus-within {
+  z-index: 3;
+}
+
+.other {
+  height: 128px;
+  border-radius: var(--radius-form);
+  border: 1.5px dashed #9e9991;
+  background: rgba(227, 218, 203, 0.45);
+  box-shadow: none;
+}
+
+.heading {
+  position: absolute;
+  z-index: 2;
+  left: 22px;
+  right: 18px;
+  top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.other .heading {
+  right: auto;
+  justify-content: flex-start;
+}
+
+.titleRow {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: var(--heading);
+}
+
+.pen {
+  width: 28px;
+  height: 28px;
+  margin-left: -6px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--navy);
+  cursor: pointer;
+}
+
+.pen:hover {
+  background: var(--card);
+}
+
+.private {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  color: var(--body);
+  font: 400 12px/1.5 var(--font);
+  white-space: nowrap;
+}
+
+.controls {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 3px 3px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--card);
+}
+
+.total {
+  min-width: 34px;
+  font: 700 15px/normal var(--font);
+  font-variant-numeric: tabular-nums;
+}
+
+.add {
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px 0 7px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--canvas);
+  color: var(--navy);
+  font: var(--small);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.add:hover {
+  background: var(--line);
+}
+
+.add:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.floor {
+  position: absolute;
+  inset: 48px 22px 0;
+}
+
+.other .floor {
+  inset: 0;
+}
+
+.stone {
+  position: absolute;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.stone:hover {
+  transform: translateY(-2px);
+}
+
+.stone:focus-visible {
+  outline: 2px solid var(--coding);
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+.selected {
+  z-index: 1;
+  transform: translateY(-6px);
+  filter: drop-shadow(0 8px 10px rgba(20, 18, 43, 0.25));
+}
+
+.selected:hover {
+  transform: translateY(-6px);
+}
+
+
+.empty {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 28px;
+  text-align: center;
+  font: var(--small);
+  color: var(--body);
+}
+
+/* Hover preview of a stone: hours + start of "What did you do?" */
+.tip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  z-index: 4;
+  width: max-content;
+  max-width: 240px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--card);
+  box-shadow: 0 10px 24px rgba(20, 18, 43, 0.14);
+  color: var(--navy);
+  font: var(--small);
+  text-align: left;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 4px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+.tip strong {
+  font: 700 14px/1.3 var(--font);
+}
+
+.tipNote {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tipEmpty {
+  color: var(--body);
+  font-style: italic;
+}
+
+.stone:hover .tip,
+.stone:focus-visible .tip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.stone:hover,
+.stone:focus-visible {
+  z-index: 2;
+}

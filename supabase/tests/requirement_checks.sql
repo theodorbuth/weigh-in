@@ -78,6 +78,24 @@ begin
   raise notice 'PASS req 3: wrong password inserts nothing; join works; joining twice -> unique_violation (PK)';
 end $$;
 
+-- Any member may rename/recolour a shared category, but not change anything else about it.
+do $$
+declare n int;
+begin
+  update public.categories set name = 'Reading', colour = '#9C8BC9'
+  where project_id = (select project_id from t_project) and name = 'Research';
+  get diagnostics n = row_count;
+  assert n = 1, 'a member should be able to rename a shared category';
+  update public.categories set name = 'Research', colour = '#5FB3A8'
+  where project_id = (select project_id from t_project) and name = 'Reading';
+  begin
+    update public.categories set shared_at = null where project_id = (select project_id from t_project);
+    raise exception 'members must not be able to un-share a category';
+  exception when insufficient_privilege then null;
+  end;
+  raise notice 'PASS members can rename/recolour shared categories (and nothing else)';
+end $$;
+
 -- Members can read the project password to share it (non-members can't see the project at all — checked below).
 do $$
 declare pw text;

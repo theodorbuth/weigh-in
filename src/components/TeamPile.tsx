@@ -1,10 +1,11 @@
 import { useDraggable } from '@dnd-kit/core'
-import type { CSSProperties, ReactNode } from 'react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 import plinthGlow from '../assets/plinth-glow.svg'
 import stonePlinth from '../assets/stone-plinth.svg'
 import { formatHours } from '../lib/format'
 import { layoutPit } from '../lib/pitLayout'
 import Stone from './Stone'
+import StoneDetails from './StoneDetails'
 import styles from './TeamPile.module.css'
 
 export interface PileStone {
@@ -20,8 +21,8 @@ export interface PileStone {
   faded?: boolean
   /** Rebalancing: this stone can be dragged (dnd-kit id + data). Only use inside a DndContext. */
   drag?: { id: string; data: Record<string, unknown>; label: string }
-  /** Shown in a hover preview when given (e.g. after the reveal). */
-  detail?: { category: string; note: string | null }
+  /** Shown in a hover preview when given (e.g. after the reveal); a click opens the full read-only card. */
+  detail?: { category: string; note: string | null; link?: string | null }
 }
 
 interface TeamPileProps {
@@ -71,6 +72,9 @@ export default function TeamPile({ stones, unit, width, height, grey = false, em
   const floor = height - PLINTH_H / 2
   const placed = layoutPit(stones, { width: width * PILE_BASE, floor, unit, taper: PILE_TAPER })
   const offset = (width * (1 - PILE_BASE)) / 2
+  // Click a revealed stone → read-only card with both fields (like My stones: hover previews, click opens).
+  const [open, setOpen] = useState<{ id: PileStone['id']; el: HTMLElement } | null>(null)
+  const openStone = open ? stones.find((s) => s.id === open.id) : undefined
 
   return (
     <div className={styles.pile} style={{ width, height }}>
@@ -124,10 +128,22 @@ export default function TeamPile({ stones, unit, width, height, grey = false, em
         return (
           <span
             key={p.stone.id}
-            className={`${styles.stone} ${styles.hoverable}${revealClass}`}
+            className={`${styles.stone} ${styles.hoverable} ${styles.clickable}${open?.id === p.stone.id ? ` ${styles.selected}` : ''}${revealClass}`}
             style={{ left: p.x + offset, top: p.y, ...revealStyle }}
             tabIndex={0}
-            aria-label={`${d.category}, ${formatHours(p.stone.hours)}${d.note ? `: ${d.note}` : ''}`}
+            role="button"
+            aria-haspopup="dialog"
+            aria-label={`${d.category}, ${formatHours(p.stone.hours)}${d.note ? `: ${d.note}` : ''}. Show details`}
+            onClick={(e) => {
+              const el = e.currentTarget
+              setOpen((o) => (o?.id === p.stone.id ? null : { id: p.stone.id, el }))
+            }}
+            onKeyDown={(e) => {
+              if (e.key !== 'Enter' && e.key !== ' ') return
+              e.preventDefault()
+              const el = e.currentTarget
+              setOpen((o) => (o?.id === p.stone.id ? null : { id: p.stone.id, el }))
+            }}
           >
             <span className={styles.tip} role="tooltip">
               <strong>
@@ -140,6 +156,20 @@ export default function TeamPile({ stones, unit, width, height, grey = false, em
         )
       })}
       {stones.length === 0 && emptyText && <p className={styles.empty}>{emptyText}</p>}
+      {open && openStone?.detail && !grey && (
+        <StoneDetails
+          anchor={open.el}
+          title={openStone.detail.category}
+          hours={openStone.hours}
+          seed={openStone.id}
+          colour={openStone.colour}
+          variant={openStone.planned ? 'planned' : openStone.other ? 'other' : 'color'}
+          note={openStone.detail.note}
+          link={openStone.detail.link ?? null}
+          noteLabel={openStone.planned ? 'Planned task' : undefined}
+          onClose={() => setOpen(null)}
+        />
+      )}
     </div>
   )
 }

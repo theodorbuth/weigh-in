@@ -1,0 +1,54 @@
+.card {
+  position: absolute;
+  z-index: 40;
+  animation: details-in 0.14s ease;
+}
+
+.hours {
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--canvas);
+  font: 700 16px/normal var(--font);
+  font-variant-numeric: tabular-nums;
+  color: var(--navy);
+}
+
+.value {
+  padding: 14px;
+  border-radius: var(--radius-field);
+  background: var(--canvas);
+  color: var(--navy);
+  font: var(--text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.empty {
+  color: var(--body);
+  font-style: italic;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.link span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+@keyframes details-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}

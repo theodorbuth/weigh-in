@@ -69,6 +69,21 @@
   font-style: italic;
 }
 
+.clickable {
+  cursor: pointer;
+}
+
+/* The clicked stone stays lifted while its card is open; the hover preview steps aside. */
+.selected {
+  z-index: 3;
+  transform: translateY(-3px);
+}
+
+.selected .tip,
+.selected:hover .tip {
+  opacity: 0 !important;
+}
+
 .hoverable:hover .tip,
 .hoverable:focus-visible .tip {
   opacity: 1;

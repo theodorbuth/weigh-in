@@ -16,9 +16,70 @@
   text-decoration: none;
 }
 
+.account {
+  position: relative;
+}
+
 .viewer {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 4px 10px 4px 4px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--navy);
   font: var(--small);
+  cursor: pointer;
+}
+
+.viewer:hover,
+.viewer[aria-expanded='true'] {
+  background: var(--panel);
+}
+
+.flip {
+  transform: rotate(180deg);
+}
+
+.menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 30;
+  min-width: 200px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--card);
+  box-shadow: 0 12px 30px rgba(20, 18, 43, 0.14);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: calc(var(--radius-field) - 2px);
+  background: none;
+  color: var(--navy);
+  font: var(--small);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.item:hover,
+.item:focus-visible {
+  background: var(--canvas);
+  outline: none;
+}
+
+.divider {
+  margin: 4px 6px;
+  border: none;
+  border-top: 1px solid var(--line);
 }

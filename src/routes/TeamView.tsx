@@ -93,7 +93,7 @@ export default function TeamView() {
           colour: c?.colour ?? OTHER_COLOUR,
           other: !c,
           order: c?.sort_order ?? 999,
-          detail: { category: c?.name ?? 'Other work', note: s.note?.trim() || null },
+          detail: { category: c?.name ?? 'Other work', note: s.note?.trim() || null, link: s.link?.trim() || null },
         }
       })
       .sort((a, b) => a.order - b.order || Number(a.id) - Number(b.id))

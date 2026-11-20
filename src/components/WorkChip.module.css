@@ -118,3 +118,47 @@
 .danger {
   color: #8a2f22 !important;
 }
+
+/* Open work bar: tasks drawn as half-transparent stones */
+.stoneItem {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.stoneHandle {
+  display: flex;
+  align-items: flex-end;
+  padding: 2px;
+  border: none;
+  background: none;
+  cursor: grab;
+  touch-action: none;
+  transition: transform 0.15s ease;
+}
+
+.stoneHandle:hover {
+  transform: translateY(-2px);
+}
+
+.stoneHandle:focus-visible {
+  outline: 2px solid var(--coding);
+  border-radius: 50%;
+}
+
+.stoneLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--navy);
+  font: var(--small);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.stoneGhost {
+  cursor: grabbing;
+  filter: drop-shadow(0 12px 14px rgba(20, 18, 43, 0.25));
+}

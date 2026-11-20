@@ -214,7 +214,11 @@ export function useProject(projectId: number) {
           : table === 'projects'
             ? `id=eq.${projectId}`
             : `project_id=eq.${projectId}`
-      channel.on('postgres_changes', { event: '*', schema: 'public', table, filter }, soon)
+      channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table, filter }, soon)
+      channel.on('postgres_changes', { event: 'UPDATE', schema: 'public', table, filter }, soon)
+      // Supabase can't filter DELETE events (they only carry the primary key), so listen to all
+      // deletes on the table and re-fetch; RLS still decides what the re-fetch returns.
+      channel.on('postgres_changes', { event: 'DELETE', schema: 'public', table }, soon)
     }
     // Live drag previews while rebalancing: ephemeral, never stored (requirement 12).
     const seen = new Map<number, number>()

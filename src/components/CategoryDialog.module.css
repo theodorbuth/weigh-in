@@ -111,3 +111,28 @@
   font: var(--small);
   color: #8a2f22;
 }
+
+.merge {
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.merge .field {
+  width: 100%;
+}
+
+.mergeConfirm {
+  width: 100%;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: var(--radius-field);
+  background: var(--canvas);
+  font: var(--small);
+  color: var(--navy);
+}

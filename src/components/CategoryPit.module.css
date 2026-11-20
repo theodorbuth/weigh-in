@@ -220,3 +220,14 @@
 .stone:focus-visible {
   z-index: 2;
 }
+
+/* A stone is being dragged over this pit */
+.dropOver {
+  outline: 2px dashed var(--navy);
+  outline-offset: -6px;
+}
+
+.stone {
+  touch-action: none;
+  cursor: grab;
+}

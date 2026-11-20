@@ -17,13 +17,18 @@ interface CategoryDialogProps {
   takenNames: string[]
   onSave: (draft: CategoryDraft) => void
   onRemove?: () => void
+  /** Categories this one may be merged into (edit mode only). */
+  mergeTargets?: { id: number; name: string; colour: string }[]
+  onMerge?: (intoId: number) => void
   onClose: () => void
 }
 
 /** Figma "Overlay · New category" / "Edit category": name + 8 colour swatches. */
-export default function CategoryDialog({ initial, mode, takenNames, onSave, onRemove, onClose }: CategoryDialogProps) {
+export default function CategoryDialog({ initial, mode, takenNames, onSave, onRemove, mergeTargets = [], onMerge, onClose }: CategoryDialogProps) {
   const [name, setName] = useState(initial.name)
   const [colour, setColour] = useState(initial.colour.toUpperCase())
+  const [mergeInto, setMergeInto] = useState<number | null>(null)
+  const target = mergeTargets.find((t) => t.id === mergeInto)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
@@ -36,6 +41,8 @@ export default function CategoryDialog({ initial, mode, takenNames, onSave, onRe
 
   function submit(e: FormEvent) {
     e.preventDefault()
+    // Picking a merge target turns the main button into "Merge into …" — one click merges.
+    if (target && onMerge) return onMerge(target.id)
     if (!trimmed || duplicate) return
     onSave({ name: trimmed, colour })
   }
@@ -56,6 +63,7 @@ export default function CategoryDialog({ initial, mode, takenNames, onSave, onRe
           Name
           <input
             className={styles.input}
+            disabled={!!target}
             value={name}
             maxLength={40}
             autoFocus
@@ -64,7 +72,7 @@ export default function CategoryDialog({ initial, mode, takenNames, onSave, onRe
         </label>
         {duplicate && <p className={styles.error}>There’s already a category called “{trimmed}”.</p>}
 
-        <div className={styles.field}>
+        <div className={styles.field} style={target ? { opacity: 0.4, pointerEvents: 'none' } : undefined}>
           Colour
           <div className={styles.swatches} role="radiogroup" aria-label="Colour">
             {CATEGORY_COLOURS.map((c) => (
@@ -84,6 +92,32 @@ export default function CategoryDialog({ initial, mode, takenNames, onSave, onRe
           </div>
         </div>
 
+        {onMerge && mergeTargets.length > 0 && (
+          <div className={styles.merge}>
+            <label className={styles.field}>
+              Merge into another category
+              <select
+                className={styles.input}
+                value={mergeInto ?? ''}
+                onChange={(e) => setMergeInto(e.target.value ? Number(e.target.value) : null)}
+              >
+                <option value="">Choose a category…</option>
+                {mergeTargets.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {target && (
+              <p className={styles.mergeConfirm}>
+                Every stone and task in “{initial.name}” moves into “{target.name}”, and “{initial.name}” disappears.
+                Nothing is deleted.
+              </p>
+            )}
+          </div>
+        )}
+
         <div className={styles.actions}>
           {onRemove ? (
             <Button variant="text" onClick={onRemove}>
@@ -92,8 +126,8 @@ export default function CategoryDialog({ initial, mode, takenNames, onSave, onRe
           ) : (
             <span />
           )}
-          <Button type="submit" disabled={!trimmed || duplicate}>
-            {mode === 'new' ? 'Add category' : 'Save'}
+          <Button type="submit" disabled={!target && (!trimmed || duplicate)}>
+            {target ? `Merge into “${target.name}”` : mode === 'new' ? 'Add category' : 'Save'}
           </Button>
         </div>
       </form>

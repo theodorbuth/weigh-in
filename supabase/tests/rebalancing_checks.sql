@@ -150,6 +150,42 @@ begin
   raise notice 'PASS shared category during rebalancing; 24 h timeout locks the plan';
 end $$;
 
+-- Merging categories: everything moves (sealed stones, locked-plan tasks), nothing is lost.
+do $$
+declare pid int := (select project_id from t_p);
+        slides int := (select id from public.categories where project_id = (select project_id from t_p) and name = 'Slides');
+        research int := (select id from public.categories where project_id = (select project_id from t_p) and name = 'Research');
+        stones_before int; work_before int; agreements_before int; ben_private int; n int;
+begin
+  select count(*) into stones_before from public.stones where category_id in (slides, research);
+  select count(*) into work_before from public.open_work where category_id in (slides, research);
+  select count(*) into agreements_before from public.agreements;
+  -- Put a stone in Slides so there's something to move.
+  perform pg_temp.act_as('00000000-0000-0000-0000-0000000000b2');
+  insert into public.stones (project_id, user_id, category_id, hours) values (pid, private.app_user_id(), slides, 1);
+  insert into public.categories (project_id, name, colour, created_by) values (pid, 'Vid', '#9C8BC9', private.app_user_id())
+  returning id into ben_private;
+  -- Ana can't merge Ben's private category (she can't even see it).
+  perform pg_temp.act_as('00000000-0000-0000-0000-0000000000a2');
+  begin
+    perform public.merge_categories(ben_private, research);
+    raise exception 'merging someone else''s private category should fail';
+  exception when sqlstate '42501' then null;
+  end;
+  -- Ben merges the shared Slides into Research, and his own private Vid into Research.
+  perform pg_temp.act_as('00000000-0000-0000-0000-0000000000b2');
+  perform public.merge_categories(slides, research);
+  perform public.merge_categories(ben_private, research);
+  perform pg_temp.act_as_admin();
+  assert not exists (select 1 from public.categories where id in (slides, ben_private)), 'merged categories should be gone';
+  select count(*) into n from public.stones where category_id = research;
+  assert n = stones_before + 1, format('all stones should now be in Research: %s vs %s', n, stones_before + 1);
+  select count(*) into n from public.open_work where category_id = research;
+  assert n = work_before, 'tasks (incl. locked plans) should move to Research';
+  assert (select count(*) from public.agreements) = agreements_before, 'a merge must not clear agreements';
+  raise notice 'PASS merge: sealed stones and locked-plan tasks move, agreements kept, private ones protected';
+end $$;
+
 -- Deleting a project with locked open work still works (cascade).
 do $$
 begin

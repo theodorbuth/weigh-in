@@ -1,4 +1,6 @@
+import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { Pencil, Plus } from 'lucide-react'
+import type { CSSProperties, ReactNode } from 'react'
 import { formatHours } from '../lib/format'
 import { layoutPit, PIT_FLOOR } from '../lib/pitLayout'
 import type { StoneRow } from '../lib/project'
@@ -18,6 +20,36 @@ interface CategoryPitProps {
   onAdd: () => void
   onSelect: (stone: StoneRow) => void
   onEditCategory?: () => void
+  /** dnd-kit drop target id for this pit (stones can be dragged between pits). */
+  dropId: string
+}
+
+/** A stone you can click (edit) or drag (move to another pit). */
+function DraggableStone({ stone, fromPit, className, style, onClick, label, children }: {
+  stone: StoneRow
+  fromPit: string
+  className: string
+  style: CSSProperties
+  onClick: () => void
+  label: string
+  children: ReactNode
+}) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: `stone-${stone.id}`, data: { stone, fromPit } })
+  return (
+    <button
+      ref={setNodeRef}
+      type="button"
+      className={className}
+      style={{ ...style, opacity: isDragging ? 0.25 : undefined }}
+      onClick={onClick}
+      aria-label={label}
+      {...listeners}
+      {...attributes}
+      aria-roledescription="draggable stone"
+    >
+      {children}
+    </button>
+  )
 }
 
 const OTHER_FLOOR = { left: 270, width: 300, height: 110 }
@@ -34,7 +66,10 @@ export default function CategoryPit({
   onAdd,
   onSelect,
   onEditCategory,
+  dropId,
 }: CategoryPitProps) {
+  const { setNodeRef, isOver, active } = useDroppable({ id: dropId })
+  const incoming = isOver && active?.data.current?.fromPit !== dropId
   const other = colour === undefined
   const total = stones.reduce((sum, s) => sum + (s.hours ?? 0), 0)
   const floor = other ? OTHER_FLOOR : PIT_FLOOR
@@ -44,7 +79,11 @@ export default function CategoryPit({
   )
 
   return (
-    <section className={`${styles.pit} ${other ? styles.other : ''}`} aria-label={`${title}, ${formatHours(total)}`}>
+    <section
+      ref={setNodeRef}
+      className={`${styles.pit} ${other ? styles.other : ''} ${incoming ? styles.dropOver : ''}`}
+      aria-label={`${title}, ${formatHours(total)}`}
+    >
       <div className={styles.heading}>
         <div className={styles.titleRow}>
           <h2 className={styles.title}>{title}</h2>
@@ -68,13 +107,14 @@ export default function CategoryPit({
         {placed.map((p) => {
           const s = stones.find((x) => x.id === p.stone.id)!
           return (
-            <button
+            <DraggableStone
               key={s.id}
-              type="button"
+              stone={s}
+              fromPit={dropId}
               className={`${styles.stone} ${s.id === selectedId ? styles.selected : ''}`}
               style={{ left: p.x, top: p.y }}
               onClick={() => onSelect(s)}
-              aria-label={`${s.hours == null ? 'Hours not set' : formatHours(s.hours)}${s.note ? `: ${s.note}` : ''}`}
+              label={`${s.hours == null ? 'Hours not set' : formatHours(s.hours)}${s.note ? `: ${s.note}` : ''}`}
             >
               {s.id !== selectedId && (
                 <span className={styles.tip} role="tooltip">
@@ -91,7 +131,7 @@ export default function CategoryPit({
                 variant={s.hours == null ? 'planned' : other ? 'other' : 'color'}
                 unit={unit}
               />
-            </button>
+            </DraggableStone>
           )
         })}
       </div>

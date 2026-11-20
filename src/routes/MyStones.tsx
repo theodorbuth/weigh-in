@@ -1,9 +1,11 @@
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core'
 import { LockKeyhole, Plus } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import CategoryDialog, { type CategoryDraft } from '../components/CategoryDialog'
 import CategoryPit from '../components/CategoryPit'
 import ConfirmDialog from '../components/ConfirmDialog'
+import Stone from '../components/Stone'
 import StoneEditor, { type StoneDraft } from '../components/StoneEditor'
 import { nextFreeColour } from '../lib/colours'
 import { formatHours } from '../lib/format'
@@ -45,7 +47,14 @@ export default function MyStones() {
   const iSealed = !!round && hasSealed(data, round.id, me)
   const sealedCount = round ? data.seals.filter((s) => s.round_id === round.id).length : 0
 
-  const myStones = data.stones.filter((s) => s.user_id === me && s.round_id === null)
+  // Stones dragged to another pit move instantly; the database write catches up.
+  const [moved, setMoved] = useState<Record<number, number | null>>({})
+  const [dragging, setDragging] = useState<StoneRow | null>(null)
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
+
+  const myStones = data.stones
+    .filter((s) => s.user_id === me && s.round_id === null)
+    .map((s) => (s.id in moved ? { ...s, category_id: moved[s.id] } : s))
   const byCategory = (id: number | null) => myStones.filter((s) => s.category_id === id)
   const categories = data.categories
   const selected = myStones.find((s) => s.id === selectedId) ?? null
@@ -103,6 +112,30 @@ export default function MyStones() {
     }
   }
 
+  const pitId = (categoryId: number | null) => (categoryId == null ? 'pit-other' : `pit-${categoryId}`)
+
+  function onDragStart(e: DragStartEvent) {
+    setDragging((e.active.data.current?.stone as StoneRow) ?? null)
+    setSelectedId(null)
+  }
+
+  async function onDragEnd(e: DragEndEvent) {
+    const stone = e.active.data.current?.stone as StoneRow | undefined
+    setDragging(null)
+    const target = e.over?.id
+    if (!stone || typeof target !== 'string') return
+    const categoryId = target === 'pit-other' ? null : Number(target.slice(4))
+    if (categoryId === stone.category_id) return
+    setMoved((m) => ({ ...m, [stone.id]: categoryId }))
+    await run(() => supabase.from('stones').update({ category_id: categoryId }).eq('id', stone.id))
+    setMoved((m) => {
+      const { [stone.id]: _, ...rest } = m
+      return rest
+    })
+  }
+
+  const draggingCategory = dragging?.category_id == null ? undefined : categories.find((c) => c.id === dragging.category_id)
+
   async function addStone(categoryId: number | null) {
     const { ok, data: row } = await run(() =>
       supabase
@@ -146,6 +179,17 @@ export default function MyStones() {
     if (ok) setCategoryEdit(null)
   }
 
+  async function mergeCategory(from: Category, intoId: number) {
+    const { ok } = await run(() => supabase.rpc('merge_categories', { p_from: from.id, p_into: intoId }))
+    if (ok) setCategoryEdit(null)
+  }
+
+  // Shared categories merge into shared ones; your own private one can also go into another of yours.
+  const mergeTargetsFor = (c: Category) =>
+    categories.filter(
+      (t) => t.id !== c.id && (t.shared_at !== null || (c.shared_at === null && t.created_by === me)),
+    )
+
   async function deleteCategory(category: Category) {
     const { ok } = await run(() => supabase.from('categories').delete().eq('id', category.id))
     if (ok) setCategoryEdit(null)
@@ -157,6 +201,7 @@ export default function MyStones() {
   }
 
   return (
+    <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
     <div className={styles.workspace} ref={workspace}>
       <div className={styles.grid}>
         {categories.map((c) => (
@@ -172,6 +217,7 @@ export default function MyStones() {
               onAdd={() => addStone(c.id)}
               onSelect={(s) => setSelectedId(s.id)}
               onEditCategory={() => setCategoryEdit({ mode: 'edit', category: c })}
+              dropId={pitId(c.id)}
             />
           </div>
         ))}
@@ -192,6 +238,7 @@ export default function MyStones() {
           readOnly={saving}
           onAdd={() => addStone(null)}
           onSelect={(s) => setSelectedId(s.id)}
+          dropId={pitId(null)}
         />
       </div>
 
@@ -300,8 +347,23 @@ export default function MyStones() {
               ? () => deleteCategory(categoryEdit.category)
               : undefined
           }
+          mergeTargets={categoryEdit.mode === 'edit' ? mergeTargetsFor(categoryEdit.category) : []}
+          onMerge={categoryEdit.mode === 'edit' ? (intoId) => mergeCategory(categoryEdit.category, intoId) : undefined}
         />
       )}
     </div>
+      <DragOverlay dropAnimation={{ duration: 180 }}>
+        {dragging && (
+          <Stone
+            hours={dragging.hours ?? 1}
+            seed={dragging.id}
+            color={draggingCategory?.colour}
+            variant={dragging.hours == null ? 'planned' : draggingCategory ? 'color' : 'other'}
+            unit={dragging.category_id == null ? Math.min(unit, 80) : unit}
+            style={{ filter: 'drop-shadow(0 12px 14px rgba(20, 18, 43, 0.25))', cursor: 'grabbing' }}
+          />
+        )}
+      </DragOverlay>
+    </DndContext>
   )
 }

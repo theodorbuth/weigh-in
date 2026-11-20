@@ -116,6 +116,12 @@
   font-weight: 700;
 }
 
+.planNote {
+  margin-top: -6px;
+  font: var(--small);
+  color: var(--body);
+}
+
 .notSubmitted {
   margin-top: -6px;
   font: var(--small);

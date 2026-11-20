@@ -1,3 +1,5 @@
+import { useDraggable } from '@dnd-kit/core'
+import type { CSSProperties, ReactNode } from 'react'
 import plinthGlow from '../assets/plinth-glow.svg'
 import stonePlinth from '../assets/stone-plinth.svg'
 import { formatHours } from '../lib/format'
@@ -16,6 +18,8 @@ export interface PileStone {
   planned?: boolean
   /** Dim it, e.g. the chip that's being dragged away. */
   faded?: boolean
+  /** Rebalancing: this stone can be dragged (dnd-kit id + data). Only use inside a DndContext. */
+  drag?: { id: string; data: Record<string, unknown>; label: string }
   /** Shown in a hover preview when given (e.g. after the reveal). */
   detail?: { category: string; note: string | null }
 }
@@ -30,6 +34,29 @@ interface TeamPileProps {
   /** Grey while a check-in is collecting (no colours leak before the reveal). */
   grey?: boolean
   emptyText?: string
+}
+
+/** A planned stone you can pick up off the pile and drop on another (rebalancing). */
+function DraggableSpan({ drag, className, style, children }: {
+  drag: NonNullable<PileStone['drag']>
+  className: string
+  style: CSSProperties
+  children: ReactNode
+}) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: drag.id, data: drag.data })
+  return (
+    <span
+      ref={setNodeRef}
+      className={className}
+      style={{ ...style, opacity: isDragging ? 0.3 : style.opacity, cursor: 'grab', touchAction: 'none' }}
+      {...listeners}
+      {...attributes}
+      aria-label={drag.label}
+      aria-roledescription="draggable task"
+    >
+      {children}
+    </span>
+  )
 }
 
 /** Base row width as a share of the pile box, and how much each row above narrows. */
@@ -58,6 +85,26 @@ export default function TeamPile({ stones, unit, width, height, grey = false, em
           />
         )
         const d = p.stone.detail
+        if (p.stone.drag && !grey) {
+          return (
+            <DraggableSpan
+              key={p.stone.id}
+              drag={p.stone.drag}
+              className={`${styles.stone} ${styles.hoverable}`}
+              style={{ left: p.x + offset, top: p.y }}
+            >
+              {d && (
+                <span className={styles.tip} role="tooltip">
+                  <strong>
+                    {d.category} · {formatHours(p.stone.hours)}
+                  </strong>
+                  <span className={d.note ? styles.tipNote : styles.tipEmpty}>{d.note || 'No note'}</span>
+                </span>
+              )}
+              {stone}
+            </DraggableSpan>
+          )
+        }
         if (!d || grey) {
           return (
             <span

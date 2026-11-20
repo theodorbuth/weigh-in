@@ -36,7 +36,8 @@
   min-width: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  align-items: flex-end;
+  gap: 8px 22px;
 }
 
 .allAssigned {

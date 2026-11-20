@@ -55,9 +55,30 @@ export default function TeamView() {
       .sort((a, b) => a.order - b.order || Number(a.id) - Number(b.id))
 
   const revealed = revealedRoundIds(data)
+
+  // The latest locked plan stays visible (pale stones) until the next round is revealed.
+  const lockedPlan = [...data.rounds].filter((r) => r.phase === 'locked').sort((a, b) => b.number - a.number)[0]
+  const planStillCurrent =
+    !!lockedPlan && !data.rounds.some((r) => r.number > lockedPlan.number && r.phase !== 'placing')
+  const planWork = planStillCurrent ? data.openWork.filter((w) => w.round_id === lockedPlan.id && w.assigned_to != null) : []
+
   const piles = data.members.map((m) => ({
     member: m,
-    stones: toPile(data.stones.filter((s) => s.user_id === m.user_id && s.round_id != null && revealed.has(s.round_id))),
+    stones: [
+      ...toPile(data.stones.filter((s) => s.user_id === m.user_id && s.round_id != null && revealed.has(s.round_id))),
+      ...planWork
+        .filter((w) => w.assigned_to === m.user_id)
+        .map((w) => {
+          const c = category.get(w.category_id)
+          return {
+            id: `plan-${w.id}`,
+            hours: w.hours,
+            colour: c?.colour ?? OTHER_COLOUR,
+            planned: true,
+            detail: { category: `Plan · ${c?.name ?? 'Task'}`, note: w.name },
+          }
+        }),
+    ] as PileStone[],
   }))
   const latestRevealed = [...data.rounds].filter((r) => r.phase !== 'placing').sort((a, b) => b.number - a.number)[0]
   const notSubmitted = (userId: number) => !!latestRevealed && !hasSealed(data, latestRevealed.id, userId)
@@ -132,6 +153,11 @@ export default function TeamView() {
                   {statusRow(true)}
                 </div>
               )}
+              {planWork.length > 0 && !placing && (
+                <p className={styles.banner}>
+                  Plan locked · pale stones are this week’s agreed tasks. They show up in each person’s My stones.
+                </p>
+              )}
               {revealed.size === 0 ? (
                 <p className={styles.empty}>
                   {placing
@@ -141,7 +167,8 @@ export default function TeamView() {
               ) : (
                 <div className={styles.piles} style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
                   {piles.map(({ member, stones }) => {
-                    const total = stones.reduce((sum, s) => sum + s.hours, 0)
+                    const total = stones.filter((s) => !s.planned).reduce((sum, s) => sum + s.hours, 0)
+                    const planned = stones.filter((s) => s.planned).reduce((sum, s) => sum + s.hours, 0)
                     return (
                       <div key={member.user_id} className={styles.pileCell}>
                         <TeamPile stones={stones} unit={unit} width={cellWidth} height={PILE_H} />
@@ -150,6 +177,7 @@ export default function TeamView() {
                           {member.user_id === me && <span> · You</span>}
                           <span className={styles.pileHours}>{formatHours(total)}</span>
                         </p>
+                        {planned > 0 && <p className={styles.planNote}>+{formatHours(planned)} planned</p>}
                         {notSubmitted(member.user_id) && <p className={styles.notSubmitted}>Not submitted</p>}
                       </div>
                     )

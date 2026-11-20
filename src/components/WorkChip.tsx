@@ -3,6 +3,7 @@ import { ChevronDown, GripVertical, Minus, Plus, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { formatHours } from '../lib/format'
 import type { Member, OpenWork } from '../lib/project'
+import Stone from './Stone'
 import styles from './WorkChip.module.css'
 
 interface WorkChipProps {
@@ -12,6 +13,8 @@ interface WorkChipProps {
   assignable: Member[]
   /** Under a pile: show −/+ hours and an unassign ×. */
   compact?: boolean
+  /** In the Open work bar: draw the task as a half-transparent stone (this many px per 1-hour stone). */
+  stoneUnit?: number
   disabled?: boolean
   onAssign: (userId: number | null) => void
   onHours: (hours: number) => void
@@ -20,7 +23,7 @@ interface WorkChipProps {
 }
 
 /** An open-work task. Drag it onto a pile, or use the ⌄ menu (keyboard friendly). */
-export default function WorkChip({ work, colour, assignable, compact, disabled, onAssign, onHours, onEdit, onRemove }: WorkChipProps) {
+export default function WorkChip({ work, colour, assignable, compact, stoneUnit, disabled, onAssign, onHours, onEdit, onRemove }: WorkChipProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: `work-${work.id}`, data: { workId: work.id }, disabled })
   const [menu, setMenu] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -31,6 +34,54 @@ export default function WorkChip({ work, colour, assignable, compact, disabled, 
     window.addEventListener('mousedown', close)
     return () => window.removeEventListener('mousedown', close)
   }, [menu])
+
+  const menuJsx = menu && (
+    <div className={styles.menu} role="menu">
+      <span className={styles.menuLabel}>Assign to</span>
+      {assignable.map((m) => (
+        <button key={m.user_id} type="button" role="menuitem" onClick={() => (setMenu(false), onAssign(m.user_id))}>
+          {m.name}
+        </button>
+      ))}
+      <hr />
+      <button type="button" role="menuitem" onClick={() => (setMenu(false), onEdit())}>
+        Edit…
+      </button>
+      <button type="button" role="menuitem" className={styles.danger} onClick={() => (setMenu(false), onRemove())}>
+        Remove task
+      </button>
+    </div>
+  )
+
+  if (stoneUnit) {
+    return (
+      <div
+        ref={(el) => {
+          setNodeRef(el)
+          ref.current = el
+        }}
+        className={`${styles.stoneItem} ${isDragging ? styles.dragging : ''}`}
+      >
+        <button
+          type="button"
+          className={styles.stoneHandle}
+          {...listeners}
+          {...attributes}
+          aria-label={`Drag ${work.name} (${formatHours(work.hours)}) onto someone’s pile`}
+          disabled={disabled}
+        >
+          <Stone hours={work.hours} seed={`work-${work.id}`} color={colour} variant="planned" unit={stoneUnit} shadow={false} />
+        </button>
+        <span className={styles.stoneLabel}>
+          {work.name} · {formatHours(work.hours)}
+          <button type="button" className={styles.iconButton} onClick={() => setMenu((m) => !m)} disabled={disabled} aria-label={`Options for ${work.name}`} aria-expanded={menu}>
+            <ChevronDown size={13} strokeWidth={1.7} />
+          </button>
+        </span>
+        {menuJsx}
+      </div>
+    )
+  }
 
   return (
     <div
@@ -66,29 +117,20 @@ export default function WorkChip({ work, colour, assignable, compact, disabled, 
           </button>
         </>
       )}
-      {menu && (
-        <div className={styles.menu} role="menu">
-          <span className={styles.menuLabel}>Assign to</span>
-          {assignable.map((m) => (
-            <button key={m.user_id} type="button" role="menuitem" onClick={() => (setMenu(false), onAssign(m.user_id))}>
-              {m.name}
-            </button>
-          ))}
-          <hr />
-          <button type="button" role="menuitem" onClick={() => (setMenu(false), onEdit())}>
-            Edit…
-          </button>
-          <button type="button" role="menuitem" className={styles.danger} onClick={() => (setMenu(false), onRemove())}>
-            Remove task
-          </button>
-        </div>
-      )}
+      {menuJsx}
     </div>
   )
 }
 
 /** Static look-alike shown under the cursor while dragging. */
-export function WorkChipGhost({ work, colour }: { work: OpenWork; colour: string }) {
+export function WorkChipGhost({ work, colour, stoneUnit }: { work: OpenWork; colour: string; stoneUnit?: number }) {
+  if (stoneUnit) {
+    return (
+      <div className={styles.stoneGhost}>
+        <Stone hours={work.hours} seed={`work-${work.id}`} color={colour} variant="planned" unit={stoneUnit} />
+      </div>
+    )
+  }
   return (
     <div className={`${styles.chip} ${styles.overlay}`}>
       <span className={styles.handle}>

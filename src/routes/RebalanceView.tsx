@@ -50,6 +50,7 @@ export default function RebalanceView({ round }: { round: Round }) {
   const { data, reload, me, remoteDrags, sendDrag } = useProjectContext()
   const [stageRef, stageWidth] = useElementWidth<HTMLDivElement>()
   const [active, setActive] = useState<number | null>(null)
+  const [activeFromPile, setActiveFromPile] = useState(false)
   const [over, setOver] = useState<number | null>(null)
   const [dialog, setDialog] = useState<{ mode: 'new' } | { mode: 'edit'; work: OpenWork } | null>(null)
   const [newCategory, setNewCategory] = useState(false)
@@ -95,31 +96,47 @@ export default function RebalanceView({ round }: { round: Round }) {
     data.stones.filter((s) => s.user_id === userId && s.round_id != null && revealed.has(s.round_id)).reduce((t, s) => t + (s.hours ?? 0), 0)
 
   // Where each task appears right now, including my drag and teammates' live drags.
-  const previewOwner = (w: OpenWork): number | null => {
+  // Where a task is being dragged right now (mine, or a teammate's via Broadcast). The task stays
+  // on its own pile (faded while I hold it) and appears as a preview on the pile being hovered.
+  const previewTarget = (w: OpenWork): number | null | undefined => {
     if (active === w.id) return over
-    const remote = remoteDrags.find((d) => d.workId === w.id)
-    return remote ? remote.over : w.assigned_to
+    return remoteDrags.find((d) => d.workId === w.id)?.over
   }
-  const plannedFor = (userId: number) => work.filter((w) => previewOwner(w) === userId)
+  const movingAway = (w: OpenWork, userId: number) => {
+    const t = previewTarget(w)
+    return t !== undefined && t !== userId
+  }
 
   const totalOpen = work.reduce((t, w) => t + w.hours, 0)
   const average = sealedMembers.length
     ? (sealedMembers.reduce((t, m) => t + running(m.user_id), 0) + totalOpen) / sealedMembers.length
     : 0
 
+  const plannedStone = (w: OpenWork, preview: boolean): PileStone => ({
+    id: preview ? `preview-${w.id}` : `w-${w.id}`,
+    hours: w.hours,
+    colour: colourOf(w),
+    planned: true,
+    detail: { category: `${category.get(w.category_id)?.name ?? 'Task'} · planned`, note: w.name },
+    // Committed planned stones can be picked up again and dropped on another pile (or back in Open work).
+    drag:
+      preview || busy
+        ? undefined
+        : { id: `pile-work-${w.id}`, data: { workId: w.id, fromPile: true }, label: `Drag ${w.name} to another pile` },
+  })
+
   const piles = data.members.map((m) => {
-    const planned = plannedFor(m.user_id)
+    const mine = work.filter((w) => w.assigned_to === m.user_id)
+    const incoming = work.filter((w) => w.assigned_to !== m.user_id && previewTarget(w) === m.user_id)
     const stones: PileStone[] = [
       ...toPile(data.stones.filter((s) => s.user_id === m.user_id && s.round_id != null && revealed.has(s.round_id))),
-      ...planned.map((w) => ({
-        id: `w-${w.id}`,
-        hours: w.hours,
-        colour: colourOf(w),
-        planned: true,
-        detail: { category: `${category.get(w.category_id)?.name ?? 'Task'} · planned`, note: w.name },
-      })),
+      ...mine.map((w) => plannedStone(w, false)),
+      ...incoming.map((w) => plannedStone(w, true)),
     ]
-    const total = running(m.user_id) + planned.reduce((t, w) => t + w.hours, 0)
+    const total =
+      running(m.user_id) +
+      mine.filter((w) => !movingAway(w, m.user_id)).reduce((t, w) => t + w.hours, 0) +
+      incoming.reduce((t, w) => t + w.hours, 0)
     return { member: m, stones, total, sealed: hasSealed(data, round.id, m.user_id) }
   })
 
@@ -191,6 +208,7 @@ export default function RebalanceView({ round }: { round: Round }) {
   function onDragStart(e: DragStartEvent) {
     const id = workIdOf(e)
     setActive(id)
+    setActiveFromPile(!!e.active.data.current?.fromPile)
     setOver(work.find((w) => w.id === id)?.assigned_to ?? null)
     sendDrag({ by: me, workId: id, over: null })
   }
@@ -214,6 +232,8 @@ export default function RebalanceView({ round }: { round: Round }) {
     setOver(null)
   }
 
+  // Stones in the bar use the piles' scale (capped so the bar stays compact).
+  const barUnit = Math.min(unit, 44)
   const chip = (w: OpenWork, compact = false) => (
     <WorkChip
       key={w.id}
@@ -221,6 +241,7 @@ export default function RebalanceView({ round }: { round: Round }) {
       colour={colourOf(w)}
       assignable={sealedMembers}
       compact={compact}
+      stoneUnit={compact ? undefined : barUnit}
       disabled={busy}
       onAssign={(u) => assign(w, u)}
       onHours={(h) => setHours(w, h)}
@@ -328,7 +349,15 @@ export default function RebalanceView({ round }: { round: Round }) {
         </button>
       </div>
 
-      <DragOverlay>{activeWork && <WorkChipGhost work={activeWork} colour={colourOf(activeWork)} />}</DragOverlay>
+      <DragOverlay>
+        {activeWork && (
+          <WorkChipGhost
+            work={activeWork}
+            colour={colourOf(activeWork)}
+            stoneUnit={activeFromPile ? unit : activeWork.assigned_to == null ? barUnit : undefined}
+          />
+        )}
+      </DragOverlay>
 
       {dialog && (
         <WorkDialog

@@ -12,6 +12,7 @@ import {
 import { CircleCheck, Plus } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import Avatar from '../components/Avatar'
+import CountUp from '../components/CountUp'
 import CategoryDialog, { type CategoryDraft } from '../components/CategoryDialog'
 import TeamPile, { PILE_BASE, PILE_TAPER, type PileStone } from '../components/TeamPile'
 import WorkChip, { WorkChipGhost } from '../components/WorkChip'
@@ -46,7 +47,10 @@ function Droppable({ id, disabled, className, overClass, children }: { id: strin
  * agree like they sealed; the last agreement locks the plan (server-side), and any change
  * clears agreements.
  */
-export default function RebalanceView({ round }: { round: Round }) {
+// Reveal timing (ms): the stage brightens, then piles build one after another, then the controls fade in.
+const REVEAL = { brighten: 1000, firstStone: 1300, perPile: 260, perStone: 90, controls: 3200 }
+
+export default function RebalanceView({ round, revealing = false }: { round: Round; revealing?: boolean }) {
   const { data, reload, me, remoteDrags, sendDrag } = useProjectContext()
   const [stageRef, stageWidth] = useElementWidth<HTMLDivElement>()
   const [active, setActive] = useState<number | null>(null)
@@ -59,6 +63,15 @@ export default function RebalanceView({ round }: { round: Round }) {
   const [error, setError] = useState<string | null>(null)
   const [now, setNow] = useState(() => Date.now())
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }))
+  // Starts dark (like the sealed wait) and brightens a moment later, so the CSS transition plays.
+  const [dark, setDark] = useState(revealing)
+  useEffect(() => {
+    if (!revealing) return
+    const t = setTimeout(() => setDark(false), REVEAL.brighten)
+    return () => clearTimeout(t)
+  }, [revealing])
+  const fadeIn = revealing ? styles.fadeIn : ''
+  const fadeStyle = revealing ? { animationDelay: `${REVEAL.controls}ms` } : undefined
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 60_000)
@@ -261,6 +274,7 @@ export default function RebalanceView({ round }: { round: Round }) {
 
   return (
     <DndContext sensors={sensors} onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd} onDragCancel={onDragCancel}>
+      <div className={fadeIn} style={fadeStyle}>
       <Droppable id={BAR} className={styles.bar} overClass={styles.barOver}>
         <div className={styles.barTitle}>
           <strong>Open work</strong>
@@ -282,11 +296,16 @@ export default function RebalanceView({ round }: { round: Round }) {
           Add work
         </button>
       </Droppable>
+      </div>
 
-      <div ref={stageRef} className={stageStyles.stage}>
-        <span className={styles.average}>Group average · {formatHours(Math.round(average * 2) / 2)}</span>
+      <div ref={stageRef} className={`${stageStyles.stage} ${dark ? stageStyles.dark : ''}`}>
+        {revealing && <h2 className={styles.revealTitle}>The reveal</h2>}
+        <span className={`${styles.average} ${fadeIn}`} style={fadeStyle}>
+          Group average · {formatHours(Math.round(average * 2) / 2)}
+        </span>
         <div className={styles.piles} style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
-          {piles.map(({ member, stones, total, sealed }) => {
+          {piles.map(({ member, stones, total, sealed }, pileIndex) => {
+            const pileStart = REVEAL.firstStone + pileIndex * REVEAL.perPile
             const delta = Math.round((total - average) * 2) / 2
             const mover = remoteDrags.find((d) => d.over === member.user_id)
             return (
@@ -297,13 +316,21 @@ export default function RebalanceView({ round }: { round: Round }) {
                 className={`${styles.cell} ${sealed ? '' : styles.cellOff}`}
                 overClass={styles.cellOver}
               >
-                <TeamPile stones={stones} unit={unit} width={cellWidth} height={PILE_H} />
+                <TeamPile
+                  stones={stones}
+                  unit={unit}
+                  width={cellWidth}
+                  height={PILE_H}
+                  reveal={revealing ? { start: pileStart, step: REVEAL.perStone } : undefined}
+                />
                 <p className={styles.name}>
                   {member.name}
                   {member.user_id === me && <span> · You</span>}
-                  <span className={styles.total}>{formatHours(total)}</span>
+                  <span className={styles.total}>
+                    <CountUp value={total} delay={revealing ? pileStart : undefined} duration={stones.length * REVEAL.perStone + 600} />
+                  </span>
                 </p>
-                <p className={styles.delta}>
+                <p className={`${styles.delta} ${fadeIn}`} style={fadeStyle}>
                   {sealed ? `${delta > 0 ? '+' : delta < 0 ? '−' : '±'}${formatHours(Math.abs(delta))}` : 'Not submitted'}
                 </p>
                 {mover && <p className={styles.moving}>{nameOf(mover.by)} is moving a task here…</p>}
@@ -313,7 +340,7 @@ export default function RebalanceView({ round }: { round: Round }) {
         </div>
       </div>
 
-      <div className={styles.assigned} style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
+      <div className={`${styles.assigned} ${fadeIn}`} style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, ...fadeStyle }}>
         {piles.map(({ member }) => (
           <div key={member.user_id} className={styles.assignedCell}>
             {work.filter((w) => w.assigned_to === member.user_id).map((w) => chip(w, true))}
@@ -321,7 +348,7 @@ export default function RebalanceView({ round }: { round: Round }) {
         ))}
       </div>
 
-      <div className={styles.agreeRow}>
+      <div className={`${styles.agreeRow} ${fadeIn}`} style={fadeStyle}>
         <p className={styles.agreeText}>
           {error ? (
             <span className={styles.error}>{error}</span>

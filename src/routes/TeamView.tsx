@@ -1,5 +1,5 @@
 import { CircleCheck } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import Avatar from '../components/Avatar'
 import LinksBar from '../components/LinksBar'
@@ -35,6 +35,50 @@ export default function TeamView() {
   const iSealed = !!round && hasSealed(data, round.id, me)
   const waiting = placing && iSealed
   const rebalancing = round?.phase === 'revealed' || round?.phase === 'rebalancing'
+
+  // Reveal animation: once per laptop per round — live when the round flips from placing while I watch,
+  // or the first time I open the Team view after a reveal I haven't seen animate here.
+  const seenKey = (id: number) => `weighin-reveal-seen-${id}`
+  const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  const unseen = (id: number) => {
+    try {
+      return localStorage.getItem(seenKey(id)) !== '1'
+    } catch {
+      return false // storage blocked: don't replay on every visit
+    }
+  }
+  const [revealing, setRevealing] = useState<number | null>(() =>
+    round && rebalancing && unseen(round.id) && !reducedMotion() ? round.id : null,
+  )
+  const [revealRun, setRevealRun] = useState(0) // bumps when a live reveal starts → fresh animation
+  const lastSeen = useRef<{ id: number; phase: string } | null>(null)
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  useEffect(() => {
+    if (!round) return
+    const prev = lastSeen.current
+    lastSeen.current = { id: round.id, phase: round.phase }
+    if (!rebalancing) return
+    try {
+      localStorage.setItem(seenKey(round.id), '1')
+    } catch {
+      // ignore
+    }
+    const flippedNow = prev?.id === round.id && prev.phase === 'placing'
+    if (flippedNow && !reducedMotion()) {
+      // oxlint-disable-next-line react/set-state-in-effect -- reacting to a server-pushed phase change
+      setRevealing(round.id)
+      setRevealRun((n) => n + 1)
+    }
+  }, [round?.id, round?.phase, rebalancing]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // End the animation after it has played (kept separate so later data changes don't cancel it).
+  useEffect(() => {
+    if (revealing == null) return
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => setRevealing(null), 4400)
+  }, [revealing, revealRun])
+  useEffect(() => () => clearTimeout(timer.current), [])
   const lastLocked = !round && data.rounds.some((r) => r.phase === 'locked')
 
   const category = new Map(data.categories.map((c) => [c.id, c]))
@@ -130,7 +174,7 @@ export default function TeamView() {
       </div>
 
       {rebalancing ? (
-        <RebalanceView round={round!} />
+        <RebalanceView key={`${round!.id}-${revealRun}`} round={round!} revealing={revealing === round!.id} />
       ) : (
         <>
         <div ref={stageRef} className={`${styles.stage} ${waiting ? styles.dark : ''}`}>

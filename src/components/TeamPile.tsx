@@ -34,6 +34,8 @@ interface TeamPileProps {
   /** Grey while a check-in is collecting (no colours leak before the reveal). */
   grey?: boolean
   emptyText?: string
+  /** Reveal animation: first stone lands after `start` ms, each next one `step` ms later (bottom → top). */
+  reveal?: { start: number; step: number }
 }
 
 /** A planned stone you can pick up off the pile and drop on another (rebalancing). */
@@ -65,7 +67,7 @@ export const PILE_TAPER = 0.16
 const PLINTH_H = 18
 
 /** One combined pile of stones sitting on a plinth (Home cards). */
-export default function TeamPile({ stones, unit, width, height, grey = false, emptyText }: TeamPileProps) {
+export default function TeamPile({ stones, unit, width, height, grey = false, emptyText, reveal }: TeamPileProps) {
   const floor = height - PLINTH_H / 2
   const placed = layoutPit(stones, { width: width * PILE_BASE, floor, unit, taper: PILE_TAPER })
   const offset = (width * (1 - PILE_BASE)) / 2
@@ -74,7 +76,10 @@ export default function TeamPile({ stones, unit, width, height, grey = false, em
     <div className={styles.pile} style={{ width, height }}>
       <img className={styles.glow} src={plinthGlow} alt="" style={{ top: height - 26, width: width * 0.95, height: 36 }} />
       <img className={styles.plinth} src={stonePlinth} alt="" style={{ top: height - PLINTH_H, width: width * 0.75, height: PLINTH_H }} />
-      {placed.map((p) => {
+      {placed.map((p, i) => {
+        const delay = reveal ? reveal.start + i * reveal.step : 0
+        const revealStyle: CSSProperties = reveal ? { animationDelay: `${delay}ms, ${delay + 380}ms` } : {}
+        const revealClass = reveal ? ` ${styles.reveal}` : ''
         const stone = (
           <Stone
             hours={p.stone.hours}
@@ -90,8 +95,8 @@ export default function TeamPile({ stones, unit, width, height, grey = false, em
             <DraggableSpan
               key={p.stone.id}
               drag={p.stone.drag}
-              className={`${styles.stone} ${styles.hoverable}`}
-              style={{ left: p.x + offset, top: p.y }}
+              className={`${styles.stone} ${styles.hoverable}${revealClass}`}
+              style={{ left: p.x + offset, top: p.y, ...revealStyle }}
             >
               {d && (
                 <span className={styles.tip} role="tooltip">
@@ -109,8 +114,8 @@ export default function TeamPile({ stones, unit, width, height, grey = false, em
           return (
             <span
               key={p.stone.id}
-              className={styles.stone}
-              style={{ left: p.x + offset, top: p.y, opacity: p.stone.faded ? 0.35 : undefined }}
+              className={`${styles.stone}${revealClass}`}
+              style={{ left: p.x + offset, top: p.y, opacity: p.stone.faded ? 0.35 : undefined, ...revealStyle }}
             >
               {stone}
             </span>
@@ -119,8 +124,8 @@ export default function TeamPile({ stones, unit, width, height, grey = false, em
         return (
           <span
             key={p.stone.id}
-            className={`${styles.stone} ${styles.hoverable}`}
-            style={{ left: p.x + offset, top: p.y }}
+            className={`${styles.stone} ${styles.hoverable}${revealClass}`}
+            style={{ left: p.x + offset, top: p.y, ...revealStyle }}
             tabIndex={0}
             aria-label={`${d.category}, ${formatHours(p.stone.hours)}${d.note ? `: ${d.note}` : ''}`}
           >
